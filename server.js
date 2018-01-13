@@ -35,8 +35,9 @@ app.get("/", (req, res) => {
     console.log('error:', error);
     console.log('statusCode:', response && response.statusCode);
     console.log('body:', body);
+    res.render("index", { block: body });
   });
-  res.render("index");
+  // res.render("index", { block: body });
 });
 
 app.listen(PORT, () => {
