@@ -9,12 +9,13 @@
     <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
     <script type="text/javascript" src="/vendor/jquery-3.0.0.js"></script>
     <script type="text/javascript">
+      // `display-info-panel` makes `block-info-panel`s visible.
       // https://blog.neondaylight.com/build-a-simple-web-vr-ui-with-a-frame-a17a2d5b484
       AFRAME.registerComponent('display-info-panel', {
         schema: { default: '' },
         init() {
-          panelId = '#block-info-panel-' + this.data;
-          textId = '#block-info-text-' + this.data;
+          const panelId = '#block-info-panel-' + this.data;
+          const textId = '#block-info-text-' + this.data;
           const panel = document.querySelector(panelId);
           const text = document.querySelector(textId);
 
@@ -30,6 +31,35 @@
         }
       });
 
+      // `move-camera-here` moves `user-camera` in front of the block.
+      // http://ottifox.com/prototype/2017/09/25/interactive-image-grid-in-webvr.html
+      AFRAME.registerComponent('move-camera-here', {
+          schema: { default: ''},
+          init() {
+              const blockId = '#block-' + this.data;
+              var camera = document.querySelector('#user-camera');
+              var block = document.querySelector(blockId);
+              var blockPosition = block.getAttribute('position');
+
+              this.el.addEventListener('click', () => {
+                var cameraPosition = camera.getAttribute('position');
+
+                var animationValues = `from: ${cameraPosition.x} ${cameraPosition.y} ${cameraPosition.z}; to: ${blockPosition.x} 3 1.5; attribute: position; easing: ease-in; begin: blockClicked;`
+                  camera.setAttribute('animation', animationValues);
+
+                  var event = new Event('blockClicked');
+
+                  // Dispatch the event
+                  camera.dispatchEvent(event);
+                  camera.emit('blockClicked')
+
+                  console.log(camera.getAttribute('animation'))
+                });
+
+              }
+          });
+
+      // Open a WebSocket to listen for new blocks being created.
       const wsUri = 'wss://ws.blockchain.info/inv';
       const ws = new WebSocket(wsUri);
       if (ws) {
@@ -43,6 +73,7 @@
         });
       }
 
+      // Add a new block on each WebSocket message.
       var position = 5;
       function onMessage(data) {
         console.log(data);
@@ -52,7 +83,7 @@
         dateTime.setUTCSeconds(jsonObj.x.time);
         const date = dateTime.toLocaleDateString() + ' ' + dateTime.toLocaleTimeString() + '\n';
         position++;
-        $('#nextBlock').append(`<a-box display-info-panel="${position}"
+        $('#canvas').append(`<a-box display-info-panel="${position}"
                     position="${-6 + position * 2} 1.25 -5"
                     rotation="0 0 0"
                     color="#4CC3D9"
@@ -85,10 +116,11 @@
   <body>
     <h1>Block VR!</h1>
     <div>
-    <a-scene id="nextBlock">
+    <a-scene id="canvas">
         <!-- Cursor -->
-        <a-entity position="0 3 1.5">
-            <a-entity camera look-controls>
+        <a-entity id="user-camera"
+                position="0 3 1.5">
+            <a-entity camera look-controls wasd-controls>
                 <!-- Anything attached here will stay in the view like a HUD. -->
                 <a-entity position="0 0 -5"
                         geometry="primitive: ring; radiusOuter: 0.30;
@@ -118,7 +150,9 @@
         <% for (let i = 0; i < blocks.length; i++) { %>
           <% if (i == blocks.length) { %>
             <!-- Block. -->
-            <a-box display-info-panel="<%= i %>"
+            <a-box id="block-<%= i %>"
+                    display-info-panel="<%= i %>"
+                    move-camera-here="<%= i %>"
                     position="<%= 4 - i * 2 %> 1.25 -5"
                     rotation="0 0 0"
                     color="#4CC3D9"
@@ -140,7 +174,9 @@
                     visible="false"></a-text>
           <% } else { %>
             <!-- Block. -->
-            <a-box display-info-panel="<%= i %>"
+            <a-box id="block-<%= i %>"
+                    display-info-panel="<%= i %>"
+                    move-camera-here="<%= i %>"
                     position="<%= 4 - i * 2 %> 1.25 -5"
                     rotation="0 0 0"
                     color="#4CC3D9"
