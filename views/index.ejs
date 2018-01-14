@@ -14,9 +14,28 @@
   <body>
     <h1>Block VR!</h1>
     <a-scene>
+        <!-- Cursor -->
+        <a-entity position="0 2.2 4">
+            <a-entity camera look-controls>
+                <!-- Anything attached here will stay in the view like a HUD. -->
+                <a-entity position="0 0 -5" geometry="primitive: ring; radiusOuter: 0.30;
+                        radiusInner: 0.20;" material="color: cyan; shader: flat"
+                        cursor="fuse: true;">
+                    <a-animation begin="click" easing="ease-in" attribute="scale"
+                            fill="forwards" from="0.1 0.1 0.1"
+                            to="1 1 1" dur="150"></a-animation>
+                    <a-animation begin="fusing" easing="ease-in" attribute="scale"
+                            fill="forwards" from="1 1 1"
+                            to="0.1 0.1 0.1" dur="1500"></a-animation>
+                </a-entity>
+            </a-entity>
+        </a-entity>
+
         <% for (let i = blocks.length; i > 0; i--) { %>
           <a-box position="<%= -6 + i * 2 %> 1.25 -5" rotation="0 0 0" color="#4CC3D9"></a-box>
         <% } %>
+
+        <!-- <a-sky color="#ECECEC"></a-sky> -->
     </a-scene>
 
   </body>
