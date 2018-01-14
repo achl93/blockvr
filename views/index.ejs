@@ -114,11 +114,12 @@
             </a-entity>
         </a-entity>
 
-        <% for (let i = blocks.length; i > 0; i--) { %>
+        <!-- From left to right: least recent to most recent. -->
+        <% for (let i = 0; i < blocks.length; i++) { %>
           <% if (i == blocks.length) { %>
             <!-- Block. -->
             <a-box display-info-panel="<%= i %>"
-                    position="<%= -6 + i * 2 %> 1.25 -5"
+                    position="<%= 4 - i * 2 %> 1.25 -5"
                     rotation="0 0 0"
                     color="#4CC3D9"
                     width="1"
@@ -129,18 +130,18 @@
             <a-entity id="block-info-panel-<%= i %>"
                     geometry="primitive: plane; height: 1; width: 5"
                     material="shader: flat; color: pink"
-                    position="<%= -6 + i * 2 %> 3.25 -4"
+                    position="<%= 4 - i * 2 %> 3.25 -4"
                     visible="false"></a-entity>
 
             <!-- Text that goes on each panel. -->
             <a-text id="block-info-text-<%= i %>"
-                    value="<%= blocks[i - 1] %>"
-                    position="<%= -8.5 + i * 2 %> 3.25 -4"
+                    value="<%= blocks[i] %>"
+                    position="<%= 1.5 - i * 2 %> 3.25 -4"
                     visible="false"></a-text>
           <% } else { %>
             <!-- Block. -->
             <a-box display-info-panel="<%= i %>"
-                    position="<%= -6 + i * 2 %> 1.25 -5"
+                    position="<%= 4 - i * 2 %> 1.25 -5"
                     rotation="0 0 0"
                     color="#4CC3D9"
                     width="1"
@@ -152,17 +153,17 @@
             <a-entity id="block-info-panel-<%= i %>"
                     geometry="primitive: plane; height: 1; width: 5"
                     material="shader: flat; color: pink"
-                    position="<%= -6 + i * 2 %> 3.25 -4"
+                    position="<%= 4 - i * 2 %> 3.25 -4"
                     visible="false"></a-entity>
 
             <!-- Text that goes on each panel. -->
             <a-text id="block-info-text-<%= i %>"
-                    value="<%= blocks[i - 1] %>"
-                    position="<%= -8.5 + i * 2 %> 3.25 -4"
+                    value="<%= blocks[i] %>"
+                    position="<%= 1.5 - i * 2 %> 3.25 -4"
                     visible="false"></a-text>
 
             <!-- Line that runs through each block -->
-            <a-entity line="start: <%= -5.5 + i * 2 %> 1.25 -5; end: <%= -4.5 + i * 2 %> 1.25 -5; color: #ff0"></a-entity>
+            <a-entity line="start: <%= 3.5 - i * 2 %> 1.25 -5; end: <%= -3.5 + i * 2 %> 1.25 -5; color: #ff0"></a-entity>
           <% } %>
         <% } %>
     </a-scene>
