@@ -34,7 +34,7 @@
       const ws = new WebSocket(wsUri);
       if (ws) {
         ws.addEventListener('open', () => {
-          ws.send('{"op":"ping"}');
+          // ws.send('{"op":"ping"}');
           ws.send('{"op":"blocks_sub"}');
         });
         ws.addEventListener('message', (data) => {
@@ -46,6 +46,11 @@
       var position = 5;
       function onMessage(data) {
         console.log(data);
+        const jsonObj = JSON.parse(data.data);
+        const hash = jsonObj.x.hash + '\n';
+        let dateTime = new Date(0);
+        dateTime.setUTCSeconds(jsonObj.x.time);
+        const date = dateTime.toLocaleDateString() + ' ' + dateTime.toLocaleTimeString() + '\n';
         position++;
         $('#nextBlock').append(`<a-box display-info-panel="${position}"
                     position="${-6 + position * 2} 1.25 -5"
@@ -62,11 +67,11 @@
                     visible="false"></a-entity>
 
                     <a-text id="block-info-text-${position}"
-                    value="${data.hash}"
+                    value="Hash: ${hash} Time Created: ${date}"
                     position="${-8.5 + position * 2} 3.25 -4"
                     visible="false"></a-text>
 
-                    <a-entity line="start: ${-5.5 + position * 2} 1.25 -5; end: ${-4.5 + position * 2} 1.25 -5; color: #ff0"></a-entity>`);
+                    <a-entity line="start: ${-6.5 + position * 2} 1.25 -5; end: ${-7.5 + position * 2} 1.25 -5; color: #ff0"></a-entity>`);
         // hashNames.push(data.hash);
       }
     </script>
@@ -80,7 +85,7 @@
   <body>
     <h1>Block VR!</h1>
     <div>
-    <a-scene>
+    <a-scene id="nextBlock">
         <!-- Cursor -->
         <a-entity position="0 3 1.5">
             <a-entity camera look-controls>
@@ -129,7 +134,7 @@
 
             <!-- Text that goes on each panel. -->
             <a-text id="block-info-text-<%= i %>"
-                    value="<%= blocks[i] %>"
+                    value="<%= blocks[i - 1] %>"
                     position="<%= -8.5 + i * 2 %> 3.25 -4"
                     visible="false"></a-text>
           <% } else { %>
@@ -152,7 +157,7 @@
 
             <!-- Text that goes on each panel. -->
             <a-text id="block-info-text-<%= i %>"
-                    value="<%= blocks[i] %>"
+                    value="<%= blocks[i - 1] %>"
                     position="<%= -8.5 + i * 2 %> 3.25 -4"
                     visible="false"></a-text>
 
@@ -160,8 +165,6 @@
             <a-entity line="start: <%= -5.5 + i * 2 %> 1.25 -5; end: <%= -4.5 + i * 2 %> 1.25 -5; color: #ff0"></a-entity>
           <% } %>
         <% } %>
-        <div id="nextBlock"></div>
-
     </a-scene>
     </div>
   </body>

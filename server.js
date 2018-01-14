@@ -57,6 +57,7 @@ function callAPI() {
       }
     }
   }
+  console.log(hashNames);
   return hashNames;
 }
 
