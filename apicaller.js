@@ -1,61 +1,42 @@
-// This file just makes calls to the blockchain API to print the hash of most recent 5 blocks
-
-const https = require('https');
 var numRecents = 5;
-
 var hashNames = [];
 
-var options = {
-  host: 'blockchain.info',
-  path: '/latestblock',
-  headers: {'Accept' : 'application/json'}
-};
-
-var callbackMostRecent = function (response) {
-  var str = '';
-  // A chunk of data has been received
-  response.on('data', function (chunk) {
-    str += chunk;
-  });
-
-  // The whole response has been received
-  response.on('end', function () {
-    // Parse the response and set the locals to be used by the client
-    var resp = JSON.parse(str);
-    options['path'] = '/rawblock/' + resp['hash'];
-    https.get(options, callback);
-
-  });
-};
-
-var callback = function (response) {
-  var str = '';
-  // A chunk of data has been received
-  response.on('data', function (chunk) {
-    str += chunk;
-  });
-
-  // The whole response has been received
-  response.on('end', function () {
-    // Parse the response and set the locals to be used by the client
-    var resp = JSON.parse(str);
-    numRecents--;
-    hashNames.push(resp['hash']);
-    if (numRecents > 0) {
-      options['path'] = '/rawblock/' + resp['prev_block'];
-      https.get(options, callback);
-    } else {
-      // Call function implemented by Andy
-      renderHashData(hashNames);
-    }
-  });
-};
-
-// This is just a stub for Andy
+// For testing purposes
 function renderHashData(hashNames) {
   for(var i=0; i < hashNames.length; i++) {
     console.log(hashNames[i]);
   }
 }
 
-https.get(options, callbackMostRecent).end();
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+
+// Returns an array with the initial metadata for blocks
+function callAPI() {
+  var request = new XMLHttpRequest();
+  request.open('GET', 'https://blockchain.info/latestblock', false);  // `false` makes the request synchronous
+  request.send(null);
+
+  if (request.status === 200) {
+    var currHash = JSON.parse(request.responseText)['hash'];
+    while (numRecents > 0) {
+      request.open('GET', 'https://blockchain.info/rawblock/' + currHash, false);
+      request.send(null);
+      numRecents--;
+      if (request.status === 200) {
+        resp = JSON.parse(request.responseText);
+
+        // Convert epoch time to date
+        var date = new Date(0);
+        date.setUTCSeconds(resp['time']);
+
+        var desc = 'Hash: ' + resp['hash'] + '\n'
+          + 'Time Created: ' + date.toLocaleDateString() + ' ' + date.toLocaleTimeString() + '\n';
+        hashNames.push(desc);
+        currHash = resp['prev_block'];
+      }
+    }
+  }
+  return hashNames;
+}
+
+renderHashData(callAPI());
