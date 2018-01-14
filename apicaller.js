@@ -3,6 +3,8 @@
 const https = require('https');
 var numRecents = 5;
 
+var hashNames = [];
+
 var options = {
   host: 'blockchain.info',
   path: '/latestblock',
@@ -37,13 +39,23 @@ var callback = function (response) {
   response.on('end', function () {
     // Parse the response and set the locals to be used by the client
     var resp = JSON.parse(str);
-    console.log(resp['hash']);
     numRecents--;
+    hashNames.push(resp['hash']);
     if (numRecents > 0) {
       options['path'] = '/rawblock/' + resp['prev_block'];
       https.get(options, callback);
+    } else {
+      // Call function implemented by Andy
+      renderHashData(hashNames);
     }
   });
 };
+
+// This is just a stub for Andy
+function renderHashData(hashNames) {
+  for(var i=0; i < hashNames.length; i++) {
+    console.log(hashNames[i]);
+  }
+}
 
 https.get(options, callbackMostRecent).end();
