@@ -8,27 +8,45 @@
     <link rel="stylesheet" href="/styles/layout.css" type="text/css" />
     <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
     <script type="text/javascript" src="/vendor/jquery-3.0.0.js"></script>
-    <script>
-        // https://blog.neondaylight.com/build-a-simple-web-vr-ui-with-a-frame-a17a2d5b484
-        AFRAME.registerComponent('display-info-panel', {
-            schema: { default: '' },
-            init() {
-                panelId = '#block-info-panel-' + this.data;
-                textId = '#block-info-text-' + this.data;
-                const panel = document.querySelector(panelId);
-                const text = document.querySelector(textId);
+    <script type="text/javascript">
+      // https://blog.neondaylight.com/build-a-simple-web-vr-ui-with-a-frame-a17a2d5b484
+      AFRAME.registerComponent('display-info-panel', {
+        schema: { default: '' },
+        init() {
+          panelId = '#block-info-panel-' + this.data;
+          textId = '#block-info-text-' + this.data;
+          const panel = document.querySelector(panelId);
+          const text = document.querySelector(textId);
 
-                this.el.addEventListener('click', () => {
-                    panel.setAttribute('visible', true);
-                    text.setAttribute('visible', true);
-                });
+          this.el.addEventListener('click', () => {
+            panel.setAttribute('visible', true);
+            text.setAttribute('visible', true);
+          });
 
-                this.el.addEventListener('mouseleave', () => {
-                    panel.setAttribute('visible', false);
-                    text.setAttribute('visible', false);
-                })
-            }
+          this.el.addEventListener('mouseleave', () => {
+            panel.setAttribute('visible', false);
+            text.setAttribute('visible', false);
+          })
+        }
+      });
+
+      const wsUri = 'wss://ws.blockchain.info/inv';
+      const ws = new WebSocket(wsUri);
+      if (ws) {
+        ws.addEventListener('open', () => {
+          ws.send('{"op":"ping"}');
+          ws.send('{"op":"blocks_sub"}');
         });
+        ws.addEventListener('message', (data) => {
+          onMessage(data);
+          // res.render("index", { blocks: hashNames });
+        });
+      }
+
+      function onMessage(data) {
+        console.log(data);
+        // hashNames.push(data.hash);
+      }
     </script>
   </head>
 
@@ -76,15 +94,15 @@
 
             <!-- Info panel that hovers above each block. -->
             <a-entity id="block-info-panel-<%= i %>"
-                    geometry="primitive: plane; height: 1; width: 3"
+                    geometry="primitive: plane; height: 1; width: 5"
                     material="shader: flat; color: pink"
                     position="<%= -6 + i * 2 %> 3.25 -4"
                     visible="false"></a-entity>
 
             <!-- Text that goes on each panel. -->
             <a-text id="block-info-text-<%= i %>"
-                    value="BLOCK <%= i %>"
-                    position="<%= -6 + i * 2 %> 3.25 -4"
+                    value="<%= blocks[i] %>"
+                    position="<%= -8.5 + i * 2 %> 3.25 -4"
                     visible="false"></a-text>
           <% } else { %>
             <!-- Block. -->
@@ -98,15 +116,15 @@
 
             <!-- Info panel that hovers above each block. -->
             <a-entity id="block-info-panel-<%= i %>"
-                    geometry="primitive: plane; height: 1; width: 3"
+                    geometry="primitive: plane; height: 1; width: 5"
                     material="shader: flat; color: pink"
                     position="<%= -6 + i * 2 %> 3.25 -4"
                     visible="false"></a-entity>
 
             <!-- Text that goes on each panel. -->
             <a-text id="block-info-text-<%= i %>"
-                    value="BLOCK <%= i %>"
-                    position="<%= -6 + i * 2 %> 3.25 -4"
+                    value="<%= blocks[i] %>"
+                    position="<%= -8.5 + i * 2 %> 3.25 -4"
                     visible="false"></a-text>
 
             <!-- Line that runs through each block -->

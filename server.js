@@ -61,23 +61,25 @@ function callAPI() {
 }
 
 // WebSocket connection
-function establishWS () {
-  const wsUri = 'wss://ws.blockchain.info/inv';
-  const ws = new WebSocket(wsUri);
-  if (ws) {
-    ws.on('open', () => {
-      ws.send('{"op":"ping"}');
-      ws.send('{"op":"blocks_sub"}');
-    });
-    ws.on('message', (data) => {
-      onMessage(data);
-    });
-  }
-}
+// function establishWS (res) {
+//   const wsUri = 'wss://ws.blockchain.info/inv';
+//   const ws = new WebSocket(wsUri);
+//   if (ws) {
+//     ws.on('open', () => {
+//       ws.send('{"op":"ping"}');
+//       ws.send('{"op":"blocks_sub"}');
+//     });
+//     ws.on('message', (data) => {
+//       onMessage(data);
+//       // res.render("index", { blocks: hashNames });
+//     });
+//   }
+// }
 
-function onMessage(data) {
-  console.log(data);
-}
+// function onMessage(data) {
+//   console.log(data);
+//   // hashNames.push(data.hash);
+// }
 
 // Home page
 app.get("/", (req, res) => {
@@ -93,7 +95,7 @@ app.get("/", (req, res) => {
   // });
   // console.log(blocks.length);
   const blocks = callAPI();
-  establishWS();
+  // establishWS(res);
   res.render("index", { blocks: blocks });
 });
 
