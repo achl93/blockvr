@@ -61,27 +61,6 @@ function callAPI() {
   return hashNames;
 }
 
-// WebSocket connection
-// function establishWS (res) {
-//   const wsUri = 'wss://ws.blockchain.info/inv';
-//   const ws = new WebSocket(wsUri);
-//   if (ws) {
-//     ws.on('open', () => {
-//       ws.send('{"op":"ping"}');
-//       ws.send('{"op":"blocks_sub"}');
-//     });
-//     ws.on('message', (data) => {
-//       onMessage(data);
-//       // res.render("index", { blocks: hashNames });
-//     });
-//   }
-// }
-
-// function onMessage(data) {
-//   console.log(data);
-//   // hashNames.push(data.hash);
-// }
-
 // Home page
 app.get("/", (req, res) => {
   // request('https://blockchain.info/latestblock', function (error, response, body) {
