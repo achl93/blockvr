@@ -6,7 +6,7 @@ function renderHashData(hashNames) {
   for(var i=0; i < hashNames.length; i++) {
     console.log(hashNames[i]);
   }
-}
+};
 
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
@@ -40,3 +40,9 @@ function callAPI() {
 }
 
 renderHashData(callAPI());
+// module.exports = {
+//   callAPI: function () {
+//     https.get(options, callbackMostRecent).end();
+//     return hashNames;
+//   }
+// };
