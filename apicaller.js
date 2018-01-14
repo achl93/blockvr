@@ -39,7 +39,7 @@ function callAPI() {
   return hashNames;
 }
 
-renderHashData(callAPI());
+// renderHashData(callAPI());
 // module.exports = {
 //   callAPI: function () {
 //     https.get(options, callbackMostRecent).end();
