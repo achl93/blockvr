@@ -26,18 +26,26 @@ app.use("/styles", sass({
 }));
 app.use(express.static("public"));
 
-// Mount all resource routes
-// app.use("/api/main");
+// In memory object
+let blocks = [];
 
 // Home page
 app.get("/", (req, res) => {
   request('https://blockchain.info/latestblock', function (error, response, body) {
-    console.log('error:', error);
-    console.log('statusCode:', response && response.statusCode);
-    console.log('body:', body);
-    res.render("index", { block: body });
+    // console.log('error:', error);
+    // console.log('statusCode:', response && response.statusCode);
+    // console.log('body:', body);
+    let tmp = [];
+    tmp.push(body);
+    if (blocks.length === 5) {
+      blocks.splice(0, 1);
+      blocks.push(tmp);
+    } else {
+      blocks.push(tmp);
+    }
   });
-  // res.render("index", { block: body });
+  // console.log(blocks.length);
+  res.render("index", { blocks: blocks });
 });
 
 app.listen(PORT, () => {
