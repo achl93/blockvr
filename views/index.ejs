@@ -30,10 +30,16 @@
             }
         });
     </script>
+    <style>
+        div {
+            width:100px;
+        }
+    </style>
   </head>
 
   <body>
     <h1>Block VR!</h1>
+    <div>
     <a-scene>
         <!-- Cursor -->
         <a-entity position="0 3 1.5">
@@ -97,6 +103,7 @@
                     class="block"></a-box>
 
             <!-- Info panel that hovers above each block. -->
+            <!-- TODO: Make these unclickable. -->
             <a-entity id="block-info-panel-<%= i %>"
                     geometry="primitive: plane; height: 1; width: 3"
                     material="shader: flat; color: pink"
@@ -115,6 +122,6 @@
         <% } %>
 
     </a-scene>
-
+    </div>
   </body>
 </html>
