@@ -19,7 +19,8 @@
     "morgan": "^1.7.0",
     "node-sass-middleware": "^0.9.8",
     "request": "^2.83.0",
-    "xmlhttprequest": "^1.8.0"
+    "xmlhttprequest": "^1.8.0",
+    "ws": "^4.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.9.2",
