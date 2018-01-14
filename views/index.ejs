@@ -8,38 +8,112 @@
     <link rel="stylesheet" href="/styles/layout.css" type="text/css" />
     <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
     <script type="text/javascript" src="/vendor/jquery-3.0.0.js"></script>
+    <script>
+        // https://blog.neondaylight.com/build-a-simple-web-vr-ui-with-a-frame-a17a2d5b484
+        AFRAME.registerComponent('display-info-panel', {
+            schema: { default: '' },
+            init() {
+                panelId = '#block-info-panel-' + this.data;
+                textId = '#block-info-text-' + this.data;
+                const panel = document.querySelector(panelId);
+                const text = document.querySelector(textId);
+
+                this.el.addEventListener('click', () => {
+                    panel.setAttribute('visible', true);
+                    text.setAttribute('visible', true);
+                });
+
+                this.el.addEventListener('mouseleave', () => {
+                    panel.setAttribute('visible', false);
+                    text.setAttribute('visible', false);
+                })
+            }
+        });
+    </script>
   </head>
 
   <body>
     <h1>Block VR!</h1>
     <a-scene>
         <!-- Cursor -->
-        <a-entity position="0 2.2 4">
+        <a-entity position="0 3 1.5">
             <a-entity camera look-controls>
                 <!-- Anything attached here will stay in the view like a HUD. -->
-                <a-entity position="0 0 -5" geometry="primitive: ring; radiusOuter: 0.30;
-                        radiusInner: 0.20;" material="color: cyan; shader: flat"
+                <a-entity position="0 0 -5"
+                        geometry="primitive: ring; radiusOuter: 0.30;
+                        radiusInner: 0.20;"
+                        material="color: grey; shader: flat"
                         cursor="fuse: true;">
-                    <a-animation begin="click" easing="ease-in" attribute="scale"
-                            fill="forwards" from="0.1 0.1 0.1"
-                            to="1 1 1" dur="150"></a-animation>
-                    <a-animation begin="fusing" easing="ease-in" attribute="scale"
-                            fill="forwards" from="1 1 1"
-                            to="0.1 0.1 0.1" dur="1500"></a-animation>
+                    <!-- The click events lag sometimes. -->
+                    <a-animation begin="click"
+                            easing="ease-in"
+                            attribute="scale"
+                            fill="forwards"
+                            from="0.1 0.1 0.1"
+                            to="1 1 1"
+                            dur="150"></a-animation>
+                    <a-animation begin="fusing"
+                            easing="ease-in"
+                            attribute="scale"
+                            fill="forwards"
+                            from="1 1 1"
+                            to="0.1 0.1 0.1"
+                            dur="1500"></a-animation>
                 </a-entity>
             </a-entity>
         </a-entity>
 
         <% for (let i = blocks.length; i > 0; i--) { %>
           <% if (i == blocks.length) { %>
-            <a-box position="<%= -6 + i * 2 %> 1.25 -5" rotation="0 0 0" color="#4CC3D9" width="1" data-blockNo="<%= i %>" class="block"></a-box>
+            <!-- Block. -->
+            <a-box display-info-panel="<%= i %>"
+                    position="<%= -6 + i * 2 %> 1.25 -5"
+                    rotation="0 0 0"
+                    color="#4CC3D9"
+                    width="1"
+                    data-blockNo="<%= i %>"
+                    class="block"></a-box>
+
+            <!-- Info panel that hovers above each block. -->
+            <a-entity id="block-info-panel-<%= i %>"
+                    geometry="primitive: plane; height: 1; width: 3"
+                    material="shader: flat; color: pink"
+                    position="<%= -6 + i * 2 %> 3.25 -4"
+                    visible="false"></a-entity>
+
+            <!-- Text that goes on each panel. -->
+            <a-text id="block-info-text-<%= i %>"
+                    value="BLOCK <%= i %>"
+                    position="<%= -6 + i * 2 %> 3.25 -4"
+                    visible="false"></a-text>
           <% } else { %>
-            <a-box position="<%= -6 + i * 2 %> 1.25 -5" rotation="0 0 0" color="#4CC3D9" width="1" data-blockNo="<%= i %>" class="block"></a-box>
+            <!-- Block. -->
+            <a-box display-info-panel="<%= i %>"
+                    position="<%= -6 + i * 2 %> 1.25 -5"
+                    rotation="0 0 0"
+                    color="#4CC3D9"
+                    width="1"
+                    data-blockNo="<%= i %>"
+                    class="block"></a-box>
+
+            <!-- Info panel that hovers above each block. -->
+            <a-entity id="block-info-panel-<%= i %>"
+                    geometry="primitive: plane; height: 1; width: 3"
+                    material="shader: flat; color: pink"
+                    position="<%= -6 + i * 2 %> 3.25 -4"
+                    visible="false"></a-entity>
+
+            <!-- Text that goes on each panel. -->
+            <a-text id="block-info-text-<%= i %>"
+                    value="BLOCK <%= i %>"
+                    position="<%= -6 + i * 2 %> 3.25 -4"
+                    visible="false"></a-text>
+
+            <!-- Line that runs through each block -->
             <a-entity line="start: <%= -5.5 + i * 2 %> 1.25 -5; end: <%= -4.5 + i * 2 %> 1.25 -5; color: #ff0"></a-entity>
           <% } %>
         <% } %>
 
-        <!-- <a-sky color="#ECECEC"></a-sky> -->
     </a-scene>
 
   </body>
