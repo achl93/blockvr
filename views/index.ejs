@@ -43,8 +43,30 @@
         });
       }
 
+      var position = 5;
       function onMessage(data) {
         console.log(data);
+        position++;
+        $('#nextBlock').append(`<a-box display-info-panel="${position}"
+                    position="${-6 + position * 2} 1.25 -5"
+                    rotation="0 0 0"
+                    color="#4CC3D9"
+                    width="1"
+                    data-blockNo="${position}"
+                    class="block"></a-box>
+
+                    <a-entity id="block-info-panel-${position}"
+                    geometry="primitive: plane; height: 1; width: 5"
+                    material="shader: flat; color: pink"
+                    position="${-6 + position * 2} 3.25 -4"
+                    visible="false"></a-entity>
+
+                    <a-text id="block-info-text-${position}"
+                    value="${data.hash}"
+                    position="${-8.5 + position * 2} 3.25 -4"
+                    visible="false"></a-text>
+
+                    <a-entity line="start: ${-5.5 + position * 2} 1.25 -5; end: ${-4.5 + position * 2} 1.25 -5; color: #ff0"></a-entity>`);
         // hashNames.push(data.hash);
       }
     </script>
@@ -131,6 +153,7 @@
             <a-entity line="start: <%= -5.5 + i * 2 %> 1.25 -5; end: <%= -4.5 + i * 2 %> 1.25 -5; color: #ff0"></a-entity>
           <% } %>
         <% } %>
+        <div id="nextBlock"></div>
 
     </a-scene>
 
