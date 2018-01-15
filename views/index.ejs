@@ -36,7 +36,7 @@
                     if (cameraPosition.x !== blockPosition.x) {
                         // Only move `user-camera` if a different block is clicked.
                         camera.setAttribute('animation', {
-                            to: { x: blockPosition.x, y: 3, z: 1.5 },
+                            to: { x: blockPosition.x, y: 2, z: 1.5 },
                         });
 
                         // Dispatch the event the animation is listening for.
@@ -82,7 +82,7 @@
 
             position++;
 
-            $('#canvas').append(`<a-box display-info-panel="${position}"
+            $('#canvas').append(`<a-box handle-events="${position}"
                         position="${-6 + position * 2} 1.25 -5"
                         rotation="0 0 0"
                         color="#4CC3D9"
@@ -117,7 +117,7 @@
     <a-scene id="canvas">
         <!-- Cursor -->
         <a-entity id="user-camera"
-                position="0 3 1.5"
+                position="0 2 1.5"
                 animation="property: position; easing: easeOutCubic; startEvents: blockClicked; dur: 1300">
             <a-entity camera look-controls>
                 <!-- Anything attached here will stay in the view like a HUD. -->
