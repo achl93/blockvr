@@ -12,49 +12,43 @@
     <script type="text/javascript">
         // `display-info-panel` makes `block-info-panel`s visible.
         // https://blog.neondaylight.com/build-a-simple-web-vr-ui-with-a-frame-a17a2d5b484
-        AFRAME.registerComponent('display-info-panel', {
+        AFRAME.registerComponent('handle-events', {
             schema: { default: '' },
             init() {
+                const blockId = '#block-' + this.data;
                 const panelId = '#block-info-panel-' + this.data;
                 const textId = '#block-info-text-' + this.data;
-                const panel = document.querySelector(panelId);
-                const text = document.querySelector(textId);
+
+                var panel = document.querySelector(panelId);
+                var text = document.querySelector(textId);
 
                 this.el.addEventListener('click', () => {
+                    // Display info panel above the clicked block.
                     panel.setAttribute('visible', true);
                     text.setAttribute('visible', true);
+
+                    // Move `user-camera` in front of the clicked block.
+                    // http://ottifox.com/prototype/2017/09/25/interactive-image-grid-in-webvr.html
+                    var camera = document.querySelector('#user-camera');
+                    const cameraPosition = camera.getAttribute('position');
+                    const blockPosition = this.el.getAttribute('position');
+
+                    if (cameraPosition.x !== blockPosition.x) {
+                        // Only move `user-camera` if a different block is clicked.
+                        camera.setAttribute('animation', {
+                            to: { x: blockPosition.x, y: 3, z: 1.5 },
+                        });
+
+                        // Dispatch the event the animation is listening for.
+                        var event = new Event('blockClicked');
+                        camera.dispatchEvent(event);
+                    }
                 });
 
                 this.el.addEventListener('mouseleave', () => {
+                    // Remove the info panel once the cursor leaves the clicked block.
                     panel.setAttribute('visible', false);
                     text.setAttribute('visible', false);
-                });
-            }
-        });
-
-        // `move-camera-here` moves `user-camera` in front of the block.
-        // http://ottifox.com/prototype/2017/09/25/interactive-image-grid-in-webvr.html
-        AFRAME.registerComponent('move-camera-here', {
-            schema: { default: ''},
-            init() {
-                const blockId = '#block-' + this.data;
-                var camera = document.querySelector('#user-camera');
-                var block = document.querySelector(blockId);
-                var blockPosition = block.getAttribute('position');
-
-                this.el.addEventListener('click', () => {
-                    var cameraPosition = camera.getAttribute('position');
-
-                    var animationValues = `from: ${cameraPosition.x} ${cameraPosition.y} ${cameraPosition.z}; to: ${blockPosition.x} 3 1.5; attribute: position; easing: ease-in; begin: blockClicked;`
-                    camera.setAttribute('animation', animationValues);
-
-                    var event = new Event('blockClicked');
-
-                    // Dispatch the event
-                    camera.dispatchEvent(event);
-                    camera.emit('blockClicked')
-
-                    console.log(camera.getAttribute('animation'))
                 });
             }
         });
@@ -123,12 +117,12 @@
     <a-scene id="canvas">
         <!-- Cursor -->
         <a-entity id="user-camera"
-                position="0 3 1.5">
-            <a-entity camera look-controls wasd-controls>
+                position="0 3 1.5"
+                animation="property: position; easing: easeOutCubic; startEvents: blockClicked; dur: 1300">
+            <a-entity camera look-controls>
                 <!-- Anything attached here will stay in the view like a HUD. -->
                 <a-entity position="0 0 -5"
-                        geometry="primitive: ring; radiusOuter: 0.30;
-                        radiusInner: 0.20;"
+                        geometry="primitive: ring; radiusOuter: 0.30; radiusInner: 0.20;"
                         material="color: grey; shader: flat"
                         cursor="fuse: true;">
                     <!-- The click events lag sometimes. -->
@@ -155,8 +149,7 @@
           <% if (i == blocks.length) { %>
             <!-- Block. -->
             <a-box id="block-<%= i %>"
-                    display-info-panel="<%= i %>"
-                    move-camera-here="<%= i %>"
+                    handle-events="<%= i %>"
                     position="<%= 4 - i * 2 %> 1.25 -5"
                     rotation="0 0 0"
                     color="#4CC3D9"
@@ -179,8 +172,7 @@
           <% } else { %>
             <!-- Block. -->
             <a-box id="block-<%= i %>"
-                    display-info-panel="<%= i %>"
-                    move-camera-here="<%= i %>"
+                    handle-events="<%= i %>"
                     position="<%= 4 - i * 2 %> 1.25 -5"
                     rotation="0 0 0"
                     color="#4CC3D9"
