@@ -7,73 +7,102 @@
     <link rel="stylesheet" href="/vendor/border-box.css" type="text/css" />
     <link rel="stylesheet" href="/styles/layout.css" type="text/css" />
     <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-animation-component@4.0.0-beta8/dist/aframe-animation-component.min.js"></script>
     <script type="text/javascript" src="/vendor/jquery-3.0.0.js"></script>
     <script type="text/javascript">
-      // https://blog.neondaylight.com/build-a-simple-web-vr-ui-with-a-frame-a17a2d5b484
-      AFRAME.registerComponent('display-info-panel', {
-        schema: { default: '' },
-        init() {
-          panelId = '#block-info-panel-' + this.data;
-          textId = '#block-info-text-' + this.data;
-          const panel = document.querySelector(panelId);
-          const text = document.querySelector(textId);
+        // `display-info-panel` makes `block-info-panel`s visible.
+        // https://blog.neondaylight.com/build-a-simple-web-vr-ui-with-a-frame-a17a2d5b484
+        AFRAME.registerComponent('handle-events', {
+            schema: { default: '' },
+            init() {
+                const blockId = '#block-' + this.data;
+                const panelId = '#block-info-panel-' + this.data;
+                const textId = '#block-info-text-' + this.data;
 
-          this.el.addEventListener('click', () => {
-            panel.setAttribute('visible', true);
-            text.setAttribute('visible', true);
-          });
+                var panel = document.querySelector(panelId);
+                var text = document.querySelector(textId);
 
-          this.el.addEventListener('mouseleave', () => {
-            panel.setAttribute('visible', false);
-            text.setAttribute('visible', false);
-          })
+                this.el.addEventListener('click', () => {
+                    // Display info panel above the clicked block.
+                    panel.setAttribute('visible', true);
+                    text.setAttribute('visible', true);
+
+                    // Move `user-camera` in front of the clicked block.
+                    // http://ottifox.com/prototype/2017/09/25/interactive-image-grid-in-webvr.html
+                    var camera = document.querySelector('#user-camera');
+                    const cameraPosition = camera.getAttribute('position');
+                    const blockPosition = this.el.getAttribute('position');
+
+                    if (cameraPosition.x !== blockPosition.x) {
+                        // Only move `user-camera` if a different block is clicked.
+                        camera.setAttribute('animation', {
+                            to: { x: blockPosition.x, y: 3, z: 1.5 },
+                        });
+
+                        // Dispatch the event the animation is listening for.
+                        var event = new Event('blockClicked');
+                        camera.dispatchEvent(event);
+                    }
+                });
+
+                this.el.addEventListener('mouseleave', () => {
+                    // Remove the info panel once the cursor leaves the clicked block.
+                    panel.setAttribute('visible', false);
+                    text.setAttribute('visible', false);
+                });
+            }
+        });
+
+        // Open a WebSocket to listen for new blocks being created.
+        const wsUri = 'wss://ws.blockchain.info/inv';
+        const ws = new WebSocket(wsUri);
+        if (ws) {
+            ws.addEventListener('open', () => {
+                // ws.send('{"op":"ping"}');
+                ws.send('{"op":"blocks_sub"}');
+            });
+
+            ws.addEventListener('message', (data) => {
+                onMessage(data);
+                // res.render("index", { blocks: hashNames });
+            });
         }
-      });
 
-      const wsUri = 'wss://ws.blockchain.info/inv';
-      const ws = new WebSocket(wsUri);
-      if (ws) {
-        ws.addEventListener('open', () => {
-          // ws.send('{"op":"ping"}');
-          ws.send('{"op":"blocks_sub"}');
-        });
-        ws.addEventListener('message', (data) => {
-          onMessage(data);
-          // res.render("index", { blocks: hashNames });
-        });
-      }
+        // Add a new block on each WebSocket message.
+        var position = 5;
+        function onMessage(data) {
+            console.log(data);
 
-      var position = 5;
-      function onMessage(data) {
-        console.log(data);
-        const jsonObj = JSON.parse(data.data);
-        const hash = jsonObj.x.hash + '\n';
-        let dateTime = new Date(0);
-        dateTime.setUTCSeconds(jsonObj.x.time);
-        const date = dateTime.toLocaleDateString() + ' ' + dateTime.toLocaleTimeString() + '\n';
-        position++;
-        $('#nextBlock').append(`<a-box display-info-panel="${position}"
-                    position="${-6 + position * 2} 1.25 -5"
-                    rotation="0 0 0"
-                    color="#4CC3D9"
-                    width="1"
-                    data-blockNo="${position}"
-                    class="block"></a-box>
+            const jsonObj = JSON.parse(data.data);
+            const hash = jsonObj.x.hash + '\n';
 
-                    <a-entity id="block-info-panel-${position}"
-                    geometry="primitive: plane; height: 1; width: 5"
-                    material="shader: flat; color: pink"
-                    position="${-6 + position * 2} 3.25 -4"
-                    visible="false"></a-entity>
+            let dateTime = new Date(0);
+            dateTime.setUTCSeconds(jsonObj.x.time);
+            const date = dateTime.toLocaleDateString() + ' ' + dateTime.toLocaleTimeString() + '\n';
 
-                    <a-text id="block-info-text-${position}"
-                    value="Hash: ${hash} Time Created: ${date}"
-                    position="${-8.5 + position * 2} 3.25 -4"
-                    visible="false"></a-text>
+            position++;
 
-                    <a-entity line="start: ${-6.5 + position * 2} 1.25 -5; end: ${-7.5 + position * 2} 1.25 -5; color: #ff0"></a-entity>`);
-        // hashNames.push(data.hash);
-      }
+            $('#canvas').append(`<a-box display-info-panel="${position}"
+                        position="${-6 + position * 2} 1.25 -5"
+                        rotation="0 0 0"
+                        color="#4CC3D9"
+                        width="1"
+                        data-blockNo="${position}"
+                        class="block"></a-box>
+
+                        <a-entity id="block-info-panel-${position}"
+                        geometry="primitive: plane; height: 1; width: 5"
+                        material="shader: flat; color: pink"
+                        position="${-6 + position * 2} 3.25 -4"
+                        visible="false"></a-entity>
+
+                        <a-text id="block-info-text-${position}"
+                        value="Hash: ${hash} Time Created: ${date}"
+                        position="${-8.5 + position * 2} 3.25 -4"
+                        visible="false"></a-text>
+
+                        <a-entity line="start: ${-6.5 + position * 2} 1.25 -5; end: ${-7.5 + position * 2} 1.25 -5; color: #ff0"></a-entity>`);
+        }
     </script>
     <style>
         div {
@@ -85,14 +114,15 @@
   <body>
     <h1>Block VR!</h1>
     <div>
-    <a-scene id="nextBlock">
+    <a-scene id="canvas">
         <!-- Cursor -->
-        <a-entity position="0 3 1.5">
+        <a-entity id="user-camera"
+                position="0 3 1.5"
+                animation="property: position; easing: easeOutCubic; startEvents: blockClicked; dur: 1300">
             <a-entity camera look-controls>
                 <!-- Anything attached here will stay in the view like a HUD. -->
                 <a-entity position="0 0 -5"
-                        geometry="primitive: ring; radiusOuter: 0.30;
-                        radiusInner: 0.20;"
+                        geometry="primitive: ring; radiusOuter: 0.30; radiusInner: 0.20;"
                         material="color: grey; shader: flat"
                         cursor="fuse: true;">
                     <!-- The click events lag sometimes. -->
@@ -118,7 +148,8 @@
         <% for (let i = 0; i < blocks.length; i++) { %>
           <% if (i == blocks.length) { %>
             <!-- Block. -->
-            <a-box display-info-panel="<%= i %>"
+            <a-box id="block-<%= i %>"
+                    handle-events="<%= i %>"
                     position="<%= 4 - i * 2 %> 1.25 -5"
                     rotation="0 0 0"
                     color="#4CC3D9"
@@ -140,7 +171,8 @@
                     visible="false"></a-text>
           <% } else { %>
             <!-- Block. -->
-            <a-box display-info-panel="<%= i %>"
+            <a-box id="block-<%= i %>"
+                    handle-events="<%= i %>"
                     position="<%= 4 - i * 2 %> 1.25 -5"
                     rotation="0 0 0"
                     color="#4CC3D9"
